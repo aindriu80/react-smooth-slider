@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import Dialog from '@material-ui/core/Dialog';
+import React, { useState, useEffect } from "react";
+import Dialog from "@material-ui/core/Dialog";
 // Components
-import Slider from './components/Slider';
+import Slider from "./components/Slider";
 
-const Sliderprops = {
+const SliderProps = {
   zoomFactor: 30, // How much the image should zoom on hover in percent
   slideMargin: 10, // Margin on each side of slides
   maxVisibleSlides: 5,
-  pageTransition: 500 // Transition when flipping pages
+  pageTransition: 500, // Transition when flipping pages
 };
 
 // Types
@@ -25,7 +25,43 @@ type Character = {
 };
 
 const App: React.FC = () => {
-  return <div>Final Space App</div>;
+  const [data, setData] = useState<Character[]>([]);
+  const [isDialogOpen, setIsDialogueOpen] = useState(false);
+  const [activeCharacter, setActiveCharacter] = useState<Character>();
+
+  const handleDialogOpen = (character: Character) => {
+    setIsDialogueOpen(true);
+    setActiveCharacter(character);
+  };
+  useEffect(() => {
+    const getData = async () => {
+      const data = await (
+        await fetch("https://finalspaceapi.com/api/v0/character/")
+      ).json();
+      setData(data);
+    };
+    getData();
+  }, []);
+
+  console.log(data);
+
+  if (data.length < 1) return <div>loading...</div>;
+
+  return (
+    <>
+      <Dialog onClose={() => setIsDialogueOpen(false)} open={isDialogOpen}>
+        <div>Content</div>
+      </Dialog>
+
+      <Slider {...SliderProps}>
+        {data.map((character) => (
+          <div key={character.id} onClick={() => handleDialogOpen(character)}>
+            <img src={character.img_url} alt="character" />
+          </div>
+        ))}
+      </Slider>
+    </>
+  );
 };
 
 export default App;
